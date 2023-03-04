@@ -1,0 +1,91 @@
+﻿@model Student;
+@inject MegoTimeTracker.Repos.IDbRepository repo;
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Attendances";
+}
+
+@if (Model == default) {
+    var students = await repo.GetStudentsAsync();
+    var ids = students.Select(s => s.IdNumber);
+    List<SelectListItem> items = new();
+    foreach (var id in ids) {
+        SelectListItem listItem = new(id.ToString(), id.ToString(), false);
+        items.Add(listItem);
+    }
+
+    <div class="text-center">
+        <form asp-controller="Management" asp-action="ViewAttendances">
+            <select asp-items="items" name="id"></select>
+            <input type="submit" value="Select" />
+        </form>
+        <br />
+    </div>
+} else {
+    <div class="text-center">
+        <h1 class="display-4=6">@(Model.IdNumber)'s Attendance Sheet</h1>
+    </div>
+    <br/>
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            @{
+                double averageTime = 0;
+                int countedDays = 0;
+                var uniqueDays = Model.Attendances.Where(a => a.IsActive).DistinctBy(a => a.Time.Date).Count();
+                bool addedFirstDay = false;
+                for (int i = 0; i < Model.Attendances.Count - 1; i++) {
+                    if (Model.Attendances[i].IsActive && !Model.Attendances[i + 1].IsActive) {
+                        if (!addedFirstDay) {
+                            countedDays++;
+                            addedFirstDay = true;
+                        }
+                        averageTime += (Model.Attendances[i + 1].Time - Model.Attendances[i].Time).TotalMinutes;
+                        if (Model.Attendances[i].Time.Date != Model.Attendances[i + 1].Time.Date) {
+                            countedDays++;
+                        }
+                        i += 2;
+                    }
+                }
+                int uncountedDays = uniqueDays - countedDays;
+                averageTime /= 60;
+                averageTime /= countedDays;
+            }
+            <table class="table-secondary table table-responsive">
+                <thead>
+                    <tr class="text-center">
+                        <th>Total Days</th>
+                        <th>Average Time</th>
+                        <th>Days Missing a Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="text-center">
+                        <td>@countedDays</td>
+                        <td>@averageTime.ToString("0.00") hours</td>
+                        <td>@uncountedDays</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table-info table table-responsive">
+                <thead>
+                    <tr class="text-center">
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Attendances.OrderByDescending(a => a.Time)) {
+                        <tr class="text-center">
+                            <td>@item.Time.ToString("yy/MM/dd HH:mm")</td>
+                            @if (item.IsActive) {
+                                <td>Signed in</td>
+                            } else {
+                                <td>Signed out</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

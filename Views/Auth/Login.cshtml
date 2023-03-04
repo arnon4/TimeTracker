@@ -1,0 +1,32 @@
+﻿@model string;
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Login";
+}
+
+<div class="text-center">
+    <form asp-controller="Auth" asp-action="Authenticate">
+        <input type="text" name="name" id="name" placeholder="Username" oninput="ensureInputExists()" />
+        <input type="password" name="password" id="password" placeholder="Password" oninput="ensureInputExists()" />
+        <input type="submit" id="submit" value="Login" disabled />
+    </form>
+    @if (Model != default) {
+        <div class="d-flex align-items-center justify-content-center">
+            <p class="alert alert-danger">@Model</p>
+        </div>
+    }
+</div>
+
+<script>
+    function ensureInputExists() {
+        const name = document.getElementById('name').value;
+        const password = document.getElementById('password').value;
+        const submit = document.getElementById('submit');
+
+        if (name === '' || password.length < 8) {
+            submit.disabled = true;
+        } else {
+            submit.disabled = false;
+        }
+    }
+</script>

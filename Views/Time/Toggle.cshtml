@@ -1,0 +1,11 @@
+﻿@model bool;
+@{
+    Layout = "_Layout";
+    string result = Model ? "Signed in" : "Signed out";
+    ViewData["Title"] = $"Logging Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Bnei Brak Student Attendance Tracker</h1>
+    <p>Thank you for helping us keep track of your attendance</p>
+</div>

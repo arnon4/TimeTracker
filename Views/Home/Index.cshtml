@@ -1,0 +1,40 @@
+﻿@model string;
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Bnei Brak Student Attendance Tracker</h1>
+    @if (Model == default) {
+        <p>Please enter your ID number to open or close a log</p>
+    } else {
+        <div class="d-flex align-items-center justify-content-center">
+            <p class="alert alert-danger">@Model</p>
+        </div>
+    }
+    <form asp-controller="Time" asp-action="Toggle">
+        <input name="time" id="time" type="text" hidden />
+        <input name="id" id="id" type="text" placeholder="Enter your ID number" oninput="validateInput()" />
+        <input id="submit" type="submit" value="Submit" disabled />
+        <div class="d-flex align-items-center justify-content-center">
+            <p id="error" class="alert alert-info col-md-2" hidden>Invalid ID number</p>
+        </div>
+    </form>
+</div>
+
+<script>
+    window.onload = function () {
+        document.getElementById('time').value = new Date().toLocaleString();
+    }
+    function validateInput() {
+        const input = document.getElementById('id').value;
+        if (/^[0-9]{9,9}$/.test(input) === false) {
+            document.getElementById('error').hidden = false;
+            document.getElementById('submit').disabled = true;
+        } else {
+            document.getElementById('error').hidden = true;
+            document.getElementById('submit').disabled = false;
+        }
+    }
+</script>

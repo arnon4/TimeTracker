@@ -1,0 +1,100 @@
+﻿@model IEnumerable<int>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Admin View";
+
+    List<SelectListItem> items = new();
+    foreach (var id in Model) {
+        SelectListItem listItem = new() { Value = id.ToString(), Text = id.ToString(), Selected = false };
+        items.Add(listItem);
+    }
+}
+
+<div class="text-center">
+    <p class="h6">View Student Attendance</p>
+    <form asp-controller="Management" asp-action="ViewAttendances">
+        <select asp-items="items" name="id"></select>
+        <input type="submit" value="Select" />
+    </form>
+    <br />
+
+    <p class="h6">Add Student to Database</p>
+    <form asp-controller="Management" asp-action="AddStudent">
+        <input type="number" name="idNumber" />
+        <input type="submit" value="Add student" />
+    </form>
+    <br/>
+
+    <p class="h6">Remove Student from Database</p>
+    <form id="deleteForm" asp-controller="Management" asp-action="DeleteStudent">
+        <select asp-items="items" name="id"></select>
+        <input type="submit" value="Delete" onclick="confirmDelete()"/>
+    </form>
+    <br />
+
+    <p class="h6">Change Password</p>
+    <form id="passwordForm" asp-controller="Auth" asp-action="ChangePassword">
+        <input type="password" name="oldpass" placeholder="Verify your old pasword"/>
+        <br/>
+        <input id="firstPassword" name="newpass" type="password" placeholder="Enter new password" oninput="validatePassword()"/>
+        <br />
+        <input id="secondPassword" type="password" placeholder="Repeat password" oninput="validatePassword()" />
+        <br/>
+        <input id="submitPassword" type="submit" value="Submit"/>
+        <div class="d-flex align-items-center justify-content-center">
+            <p style="white-space: pre-line" id="error" class="alert alert-info col-md-4" hidden></p>
+        </div>
+    </form>
+</div>
+
+<script>
+    function confirmDelete() {
+        var confirmed = confirm("Deleting a student is irreversible. Proceed?");
+        if (confirmed) {
+            document.getElementById('deleteForm').submit();
+        }
+    }
+
+    function validatePassword() {
+        const firstPassword = document.getElementById('firstPassword').value;
+        const secondPassword = document.getElementById('secondPassword').value;
+        const error = document.getElementById('error');
+        const button = document.getElementById('submitPassword');
+
+        const hasNumber = /[0-9]/.test(firstPassword);
+        const hasUppercase = /[A-Z]/.test(firstPassword);
+        const hasLowercase = /[a-z]/.test(firstPassword);
+        const hasSpecial = /[!@@#$%^&*]/.test(firstPassword);
+        const isLongEnough = firstPassword.length >= 8;
+        const passwordsMatch = firstPassword === secondPassword;
+        const isLegal = hasNumber && hasUppercase && hasLowercase && hasSpecial && isLongEnough && passwordsMatch;
+        let errorMessage = "";
+        if (!hasNumber) {
+            errorMessage += "Password must contain a number\n";
+        }
+        if (!hasUppercase) {
+            errorMessage += "Password must contain an uppercase letter\n";
+        }
+        if (!hasLowercase) {
+            errorMessage += "Password must contain a lowercase letter\n";
+        }
+        if (!hasSpecial) {
+            errorMessage += "Password must contain a special character\n";
+        }
+        if (!isLongEnough) {
+            errorMessage += "Password must contain at least 8 characters";
+        }
+        if (!passwordsMatch) {
+            errorMessage += "Password and repeast password do not match";
+        }
+        if (!isLegal) {
+            error.hidden = false;
+            button.disabled = true;
+            error.innerHTML = errorMessage;
+        } else {
+            error.hidden = true;
+            button.disabled = false;
+            error.innerHTML = "";
+        }
+    }
+</script>
